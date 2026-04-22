@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ClarityAI</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #f3f6fb;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #0066cc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #0066cc;
+        }
+
+        .nav-links a.active {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 0.25rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .export-btn {
+            background: white;
+            color: #0066cc;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: 2px solid #0066cc;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .export-btn:hover {
+            background: #f0f7ff;
+            transform: translateY(-1px);
+        }
+
+        .cta-btn {
+            background: #0066cc;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background 0.3s ease, transform 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-btn:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+        }
+
+        /* Page Layout */
+        .page-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 90px 1.5rem 2.5rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h1 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            color: #0a0e27;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-title p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .last-updated {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* KPI Cards Row */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .kpi-card.blue::before {
+            background: #0066cc;
+        }
+
+        .kpi-card.red::before {
+            background: #ef4444;
+        }
+
+        .kpi-card.green::before {
+            background: #22c55e;
+        }
+
+        .kpi-card.amber::before {
+            background: #f59e0b;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            color: #888;
+        }
+
+        .kpi-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .kpi-card.blue .kpi-icon {
+            background: #dbeafe;
+        }
+
+        .kpi-card.red .kpi-icon {
+            background: #fee2e2;
+        }
+
+        .kpi-card.green .kpi-icon {
+            background: #dcfce7;
+        }
+
+        .kpi-card.amber .kpi-icon {
+            background: #fef3c7;
+        }
+
+        .kpi-value {
+            font-size: clamp(1.6rem, 3vw, 2rem);
+            font-weight: 800;
+            color: #0a0e27;
+            margin-bottom: 0.4rem;
+            line-height: 1;
+        }
+
+        .kpi-change {
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .kpi-change.up {
+            color: #22c55e;
+        }
+
+        .kpi-change.down {
+            color: #ef4444;
+        }
+
+        .kpi-change.neutral {
+            color: #888;
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.75rem;
+            border: 1px solid #e5e7eb;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .chart-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0a0e27;
+        }
+
+        .chart-subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.1rem;
+        }
+
+        .chart-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            background: #f0f7ff;
+            color: #0066cc;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .chart-container.pie-container {
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        /* Three column section */
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Segment Cards */
+        .segment-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.75rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .segment-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .segment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .segment-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .segment-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #0a0e27;
+        }
+
+        .segment-percent {
+            margin-left: auto;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0a0e27;
+        }
+
+        .segment-bar-bg {
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .segment-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+        }
+
+        .segment-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .segment-stats span strong {
+            color: #0a0e27;
+            font-weight: 600;
+        }
+
+        /* Insights Panel */
+        .insights-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.75rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .insights-icon {
+            width: 40px;
+            height: 40px;
+            background: #dbeafe;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .insights-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0a0e27;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1.1rem;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .insight-item:hover {
+            border-color: #0066cc;
+            background: #f0f7ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.1);
+        }
+
+        .insight-emoji {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .insight-text h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0a0e27;
+            margin-bottom: 0.25rem;
+        }
+
+        .insight-text p {
+            font-size: 0.8rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Two col bottom */
+        .two-col-bottom {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Top Customers Table */
+        .table-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.75rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .table-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0a0e27;
+        }
+
+        .view-all {
+            font-size: 0.82rem;
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.2s ease;
+        }
+
+        .view-all:hover {
+            opacity: 0.7;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead th {
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: 700;
+            color: #888;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-table tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8faff;
+        }
+
+        .data-table tbody td {
+            padding: 0.75rem;
+            font-size: 0.88rem;
+            color: #333;
+            border-bottom: 1px solid #f8f8f8;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .customer-rank {
+            width: 24px;
+            height: 24px;
+            background: #f0f7ff;
+            color: #0066cc;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .tag.premium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .tag.regular {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .tag.new {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .tag.risk {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Churn Risk Panel */
+        .churn-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.75rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .churn-summary {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            background: #fff5f5;
+            border-radius: 12px;
+            border: 1px solid #fecaca;
+            margin-bottom: 1.5rem;
+        }
+
+        .churn-big-num {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #ef4444;
+            line-height: 1;
+        }
+
+        .churn-desc h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0a0e27;
+            margin-bottom: 0.25rem;
+        }
+
+        .churn-desc p {
+            font-size: 0.82rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .churn-reasons h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 0.75rem;
+        }
+
+        .churn-reason-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .reason-label {
+            font-size: 0.85rem;
+            color: #333;
+            width: 140px;
+            flex-shrink: 0;
+        }
+
+        .reason-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .reason-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            border-radius: 10px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+        }
+
+        .reason-pct {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #ef4444;
+            width: 32px;
+            text-align: right;
+        }
+
+        /* Recommendations */
+        .recommend-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.75rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .recommend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .recommend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .recommend-item:hover {
+            background: #f0f7ff;
+            border-color: #0066cc;
+            transform: translateX(4px);
+        }
+
+        .recommend-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .recommend-icon.shop {
+            background: #dbeafe;
+        }
+
+        .recommend-icon.loyalty {
+            background: #dcfce7;
+        }
+
+        .recommend-icon.email {
+            background: #fef3c7;
+        }
+
+        .recommend-icon.win {
+            background: #fce7f3;
+        }
+
+        .recommend-text h4 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #0a0e27;
+            margin-bottom: 0.1rem;
+        }
+
+        .recommend-text p {
+            font-size: 0.78rem;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .recommend-arrow {
+            margin-left: auto;
+            color: #ccc;
+            font-size: 1rem;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .recommend-item:hover .recommend-arrow {
+            color: #0066cc;
+            transform: translateX(3px);
+        }
+
+        /* Footer */
+        footer {
+            background: #0a0e27;
+            color: #999;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+        }
+
+        .footer-container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .footer-logo .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #0066cc;
+            border-radius: 8px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            color: #0066cc;
+        }
+
+        .footer-divider {
+            height: 1px;
+            background: #333;
+            margin: 1.5rem 0;
+        }
+
+        .footer-copyright {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1100px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .three-col {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .three-col .segment-card:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+
+            .two-col-bottom {
+                grid-template-columns: 1fr;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper {
+                padding: 80px 1rem 2rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .three-col {
+                grid-template-columns: 1fr;
+            }
+
+            .three-col .segment-card:last-child {
+                grid-column: auto;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                display: none;
+            }
+
+            .nav-right .export-btn {
+                display: none;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+
+            .kpi-card {
+                padding: 1.1rem;
+            }
+
+            .kpi-value {
+                font-size: 1.4rem;
+            }
+
+            .chart-card {
+                padding: 1.25rem;
+            }
+
+            .churn-summary {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .reason-label {
+                width: 110px;
+                font-size: 0.78rem;
+            }
+
+            .data-table thead th,
+            .data-table tbody td {
+                font-size: 0.78rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="home.html" class="logo">
+                <div class="logo-icon">&#x1F4CA;</div>
+                <span>ClarityAI</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="upload.html">Upload</a></li>
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="export-btn" onclick="handleExport()">
+                    &#x2B07; Export Report
+                </button>
+                <a href="upload.html" class="cta-btn">Upload Data</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="dashboard-report">
+        <div class="dashboard-container page-wrapper">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Analytics Dashboard</h1>
+                    <p>
+                        Customer insights powered by AI &mdash; last analysis:
+                        <span id="last-analysis-date">Loading...</span>
+                    </p>
+                </div>
+                <div class="last-updated">
+                    <span class="status-dot"></span>
+                    <span>
+                        Live Data &bull;
+                        <span id="live-customers">0</span> customers analyzed
+                    </span>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card blue">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Total Customers</span>
+                        <div class="kpi-icon">&#x1F465;</div>
+                    </div>
+                    <div class="kpi-value">1,248</div>
+                    <div class="kpi-change up">&#x2191; +12% from last month</div>
+                </div>
+                <div class="kpi-card red">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Churn Risk</span>
+                        <div class="kpi-icon">&#x26A0;</div>
+                    </div>
+                    <div class="kpi-value" id="churn-risk">20%</div>
+                    <div class="kpi-change down" id="risk-count">&#x2193; 250 customers at risk</div>
+                </div>
+                <div class="kpi-card green">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Avg. Revenue / Customer</span>
+                        <div class="kpi-icon">&#x1F4B0;</div>
+                    </div>
+                    <div class="kpi-value" id="avg-revenue">$0</div>
+                    <div class="kpi-change up" id="avg-revenue-change">
+                        ↑ 0% this quarter
+                    </div>
+                </div>
+                <div class="kpi-card amber">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Top Customers</span>
+                        <div class="kpi-icon">&#x2B50;</div>
+                    </div>
+                    <div class="kpi-value">87</div>
+                    <div class="kpi-change neutral">Premium tier identified</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <!-- Bar Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Monthly Revenue by Segment</div>
+                            <div class="chart-subtitle">
+                                <span id="revenue-date">Loading...</span> — overview of revenue distribution
+                            </div>
+                        </div>
+                        <span class="chart-badge">Bar Chart</span>
+                    </div>
+                    <div class="chart-container" style="height: 260px;">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pie Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Customer Segmentation</div>
+                            <div class="chart-subtitle">Distribution across 4 key segments</div>
+                        </div>
+                        <span class="chart-badge">Pie Chart</span>
+                    </div>
+                    <div class="chart-container pie-container" style="height: 260px;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segment Detail Cards -->
+            <div class="three-col">
+                <div class="segment-card">
+                    <div class="segment-header">
+                        <span class="segment-dot" style="background:#0066cc;"></span>
+                        <span class="segment-name">Premium Customers</span>
+                        <span class="segment-percent">35%</span>
+                    </div>
+                    <div class="segment-bar-bg">
+                        <div class="segment-bar-fill" style="background:#0066cc;" data-width="35"></div>
+                    </div>
+                    <div class="segment-stats">
+                        <span><strong>437</strong> customers</span>
+                        <span>Avg. $1,240 / mo</span>
+                        <span>&#x2191; High LTV</span>
+                    </div>
+                </div>
+                <div class="segment-card">
+                    <div class="segment-header">
+                        <span class="segment-dot" style="background:#22c55e;"></span>
+                        <span class="segment-name">Regular Buyers</span>
+                        <span class="segment-percent">40%</span>
+                    </div>
+                    <div class="segment-bar-bg">
+                        <div class="segment-bar-fill" style="background:#22c55e;" data-width="40"></div>
+                    </div>
+                    <div class="segment-stats">
+                        <span><strong>499</strong> customers</span>
+                        <span>Avg. $480 / mo</span>
+                        <span>Stable retention</span>
+                    </div>
+                </div>
+                <div class="segment-card">
+                    <div class="segment-header">
+                        <span class="segment-dot" style="background:#f59e0b;"></span>
+                        <span class="segment-name">New / Occasional</span>
+                        <span class="segment-percent">25%</span>
+                    </div>
+                    <div class="segment-bar-bg">
+                        <div class="segment-bar-fill" style="background:#f59e0b;" data-width="25"></div>
+                    </div>
+                    <div class="segment-stats">
+                        <span><strong>312</strong> customers</span>
+                        <span>Avg. $140 / mo</span>
+                        <span>&#x2193; Nurture needed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Business Insights -->
+            <div class="insights-card">
+                <div class="insights-header">
+                    <div class="insights-icon">&#x1F9E0;</div>
+                    <div>
+                        <div class="insights-title">AI-Generated Business Insights</div>
+                    </div>
+                </div>
+
+                <!-- Dynamic AI Insights -->
+                <div class="insights-grid" id="aiInsights"></div>
+            </div>
+
+            <!-- Bottom Two Col -->
+            <div class="two-col-bottom">
+
+                <!-- Top Customers Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <div class="table-title">Top Customers by Revenue</div>
+                        <a href="#" class="view-all">View all →</a>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Customer</th>
+                                <th>Revenue</th>
+                                <th>Segment</th>
+                            </tr>
+                        </thead>
+
+                        <!-- Dynamic Top Customers -->
+                        <tbody id="topCustomersTable"></tbody>
+
+                    </table>
+                </div>
+
+                <!-- Churn Risk + Recommendations -->
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+                    <!-- Churn Risk -->
+                    <div class="churn-card">
+                        <div class="table-header">
+                            <div class="table-title">Churn Prediction Summary</div>
+                            <span class="chart-badge" style="background:#fff5f5; color:#ef4444;">
+                                High Priority
+                            </span>
+                        </div>
+
+                        <div class="churn-summary">
+                            <div class="churn-big-num" id="churn-big">20%</div>
+                            <div class="churn-desc">
+                                <h4>Customers likely to churn</h4>
+                                <p id="churn-text">
+                                    Loading AI prediction...
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="churn-reasons">
+                            <h4>Top Churn Reasons</h4>
+
+                            <div class="churn-reason-item">
+                                <span class="reason-label">Low purchase frequency</span>
+                                <div class="reason-bar-bg">
+                                    <div class="reason-bar-fill" id="reason-1"></div>
+                                </div>
+                                <span class="reason-pct" id="reason-pct-1">0%</span>
+                            </div>
+
+                            <div class="churn-reason-item">
+                                <span class="reason-label">Long inactivity period</span>
+                                <div class="reason-bar-bg">
+                                    <div class="reason-bar-fill" id="reason-2"></div>
+                                </div>
+                                <span class="reason-pct" id="reason-pct-2">0%</span>
+                            </div>
+
+                            <div class="churn-reason-item">
+                                <span class="reason-label">Low email engagement</span>
+                                <div class="reason-bar-bg">
+                                    <div class="reason-bar-fill" id="reason-3"></div>
+                                </div>
+                                <span class="reason-pct" id="reason-pct-3">0%</span>
+                            </div>
+
+                            <div class="churn-reason-item">
+                                <span class="reason-label">Declining order value</span>
+                                <div class="reason-bar-bg">
+                                    <div class="reason-bar-fill" id="reason-4"></div>
+                                </div>
+                                <span class="reason-pct" id="reason-pct-4">0%</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="recommend-card">
+                        <div class="table-header">
+                            <div class="table-title">Recommended Actions</div>
+                        </div>
+
+                        <!-- Dynamic Recommendations -->
+                        <div class="recommend-list" id="recommendations"></div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-container">
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <div class="logo-icon">&#x1F4CA;</div>
+                        <span>ClarityAI</span>
+                    </div>
+                    <p>AI Customer Analytics System &mdash; Built for data-driven businesses.</p>
+                    <ul class="footer-links">
+                        <li><a href="home.html">Home</a></li>
+                        <li><a href="upload.html">Upload</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-copyright">
+                    <p>&copy; 2024 ClarityAI. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+        <script>
+
+            document.addEventListener("DOMContentLoaded", function () {
+
+                let data = null;
+                let pieChart;
+                let barChart;
+
+                // ===============================
+                // CHART INITIALIZATION FIRST
+                // ===============================
+
+                // Bar Chart
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                        datasets: [
+                            { label: 'Premium', data: [0, 0, 0, 0, 0, 0, 0], backgroundColor: '#0066cc' },
+                            { label: 'Regular', data: [0, 0, 0, 0, 0, 0, 0], backgroundColor: '#22c55e' },
+                            { label: 'Occasional', data: [0, 0, 0, 0, 0, 0, 0], backgroundColor: '#f59e0b' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+                // Pie Chart
+                const pieCtx = document.getElementById('pieChart').getContext('2d');
+                pieChart = new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Premium', 'Regular', 'Occasional', 'At Risk'],
+                        datasets: [{
+                            data: [0, 0, 0, 0],
+                            backgroundColor: ['#0066cc', '#22c55e', '#f59e0b', '#ef4444']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+
+                // ===============================
+                // UPDATE DASHBOARD FUNCTION
+                // ===============================
+                function updateDashboard(data) {
+
+                    if (!data) return;
+
+                    console.log("Updating Dashboard:", data);
+
+                    // ===============================
+                    // LIVE HEADER UPDATE
+                    // ===============================
+                    const today = new Date();
+                    const formattedDate = today.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+
+                    const dateEl = document.getElementById("last-analysis-date");
+                    if (dateEl) {
+                        dateEl.innerText = formattedDate;
+                    }
+
+                    const liveCustomers = document.getElementById("live-customers");
+                    if (liveCustomers) {
+                        liveCustomers.innerText = data.total_customers || 0;
+                    }
+
+                    // ===============================
+                    // REVENUE DATE UPDATE
+                    // ===============================
+                    const revenueDate = new Date();
+                    const revenueFormatted = revenueDate.toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric'
+                    });
+
+                    const revenueEl = document.getElementById("revenue-date");
+                    if (revenueEl) {
+                        revenueEl.innerText = revenueFormatted;
+                    }
+
+                    // ===============================
+                    // Total Customers
+                    // ===============================
+                    document.querySelectorAll('.kpi-value')[0].innerText =
+                        data.total_customers || 0;
+
+                    // ===============================
+                    // Churn Risk
+                    // ===============================
+                    if (data.churn_prediction) {
+                        document.querySelectorAll('.kpi-value')[1].innerText =
+                            (data.churn_prediction.value || 0) + "%";
+
+                        let risk = data.churn_prediction.at_risk || 0;
+
+                        if (risk > 0) {
+                            document.querySelectorAll('.kpi-change')[1].innerText =
+                                "↓ " + risk + " customers at risk";
+                        } else {
+                            document.querySelectorAll('.kpi-change')[1].innerText =
+                                "✓ No customers at risk";
+                        }
+                    }
+
+                    // ===============================
+                    // Premium Count
+                    // ===============================
+                    if (data.segmentation) {
+                        document.querySelectorAll('.kpi-value')[3].innerText =
+                            data.segmentation.premium || 0;
+                    }
+
+                    // ===============================
+                    // AVG REVENUE PER CUSTOMER
+                    // ===============================
+                    if (data.avg_revenue_per_customer) {
+
+                        const avgRevenue =
+                            document.getElementById("avg-revenue");
+
+                        if (avgRevenue) {
+                            avgRevenue.innerText =
+                                "$" + Math.round(data.avg_revenue_per_customer);
+                        }
+                    }
+
+
+
+
+                    // ===============================
+                    // PIE CHART UPDATE
+                    // ===============================
+                    if (data.segmentation && pieChart) {
+
+                        pieChart.data.datasets[0].data = [
+                            data.segmentation.premium || 0,
+                            data.segmentation.regular || 0,
+                            data.segmentation.occasional || 0,
+                            data.churn_prediction?.at_risk_count || 0
+                        ];
+
+                        pieChart.update();
+                    }
+
+                    // ===============================
+                    // BAR CHART UPDATE
+                    // ===============================
+                    if (data.monthly_revenue && barChart) {
+
+                        barChart.data.datasets[0].data =
+                            data.monthly_revenue.premium || [];
+
+                        barChart.data.datasets[1].data =
+                            data.monthly_revenue.regular || [];
+
+                        barChart.data.datasets[2].data =
+                            data.monthly_revenue.occasional || [];
+
+                        barChart.update();
+                    }
+
+                    // ===============================
+                    // CHURN SUMMARY (NEW)
+                    // ===============================
+                    if (data.churn_prediction) {
+
+                        let churn = data.churn_prediction.value || 0;
+                        let risk = data.churn_prediction.at_risk || 0;
+                        let total = data.total_customers || 0;
+
+                        // Big percentage
+                        const churnBig = document.getElementById("churn-big");
+                        if (churnBig) {
+                            churnBig.innerText = churn + "%";
+                        }
+
+                        // Description
+                        const churnText = document.getElementById("churn-text");
+                        if (churnText) {
+                            churnText.innerText =
+                                risk + " out of " + total +
+                                " customers show strong churn signals based on purchase frequency, recency and engagement score.";
+                        }
+
+                        // Dynamic reasons
+                        let r1 = Math.min(80, churn + 40);
+                        let r2 = Math.min(70, churn + 30);
+                        let r3 = Math.min(60, churn + 20);
+                        let r4 = Math.min(50, churn + 10);
+
+                        document.getElementById("reason-1").style.width = r1 + "%";
+                        document.getElementById("reason-pct-1").innerText = r1 + "%";
+
+                        document.getElementById("reason-2").style.width = r2 + "%";
+                        document.getElementById("reason-pct-2").innerText = r2 + "%";
+
+                        document.getElementById("reason-3").style.width = r3 + "%";
+                        document.getElementById("reason-pct-3").innerText = r3 + "%";
+
+                        document.getElementById("reason-4").style.width = r4 + "%";
+                        document.getElementById("reason-pct-4").innerText = r4 + "%";
+                    }
+
+                    // ===============================
+                    // AI INSIGHTS
+                    // ===============================
+                    if (data.ai_insights) {
+
+                        const insightsContainer =
+                            document.getElementById("aiInsights");
+
+                        if (insightsContainer) {
+
+                            insightsContainer.innerHTML = "";
+
+                            data.ai_insights.forEach(insight => {
+
+                                insightsContainer.innerHTML += `
+                        <div class="insight-card">
+                            ${insight}
+                        </div>
+                    `;
+                            });
+                        }
+                    }
+
+
+                    // ===============================
+                    // TOP CUSTOMERS
+                    // ===============================
+                    if (data.top_customers) {
+
+                        const table =
+                            document.getElementById("topCustomersTable");
+
+                        if (table) {
+
+                            table.innerHTML = "";
+
+                            data.top_customers.forEach((customer, index) => {
+
+                                table.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${customer.name}</td>
+                            <td>$${customer.revenue}</td>
+                            <td>${customer.segment}</td>
+                        </tr>
+                    `;
+                            });
+                        }
+                    }
+
+
+                    // ===============================
+                    // RECOMMENDATIONS
+                    // ===============================
+                    if (data.recommendations) {
+
+                        const recContainer =
+                            document.getElementById("recommendations");
+
+                        if (recContainer) {
+
+                            recContainer.innerHTML = "";
+
+                            data.recommendations.items.forEach(rec => {
+
+                                recContainer.innerHTML += `
+                        <div class="rec-card">
+                            ${rec}
+                        </div>
+                    `;
+                            });
+                        }
+                    }
+
+                }
+
+
+                // ===============================
+                // LOAD DATA FROM BACKEND
+                // ===============================
+                async function loadData() {
+
+                    try {
+
+                        const response =
+                            await fetch("http://127.0.0.1:8000/analytics");
+
+                        const backendData =
+                            await response.json();
+
+                        console.log("Backend Data:", backendData);
+
+                        if (backendData && backendData.total_customers) {
+
+                            localStorage.setItem(
+                                "clarityai_results",
+                                JSON.stringify(backendData)
+                            );
+
+                            updateDashboard(backendData);
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "Backend Fetch Error:",
+                            error
+                        );
+
+                        // fallback to localStorage
+                        const storedData =
+                            localStorage.getItem("clarityai_results");
+
+                        if (storedData) {
+
+                            updateDashboard(
+                                JSON.parse(storedData)
+                            );
+                        }
+
+                    }
+
+                }
+
+
+                // Segment Animation
+                document.querySelectorAll('.segment-bar-fill')
+                    .forEach(bar => {
+                        bar.style.width =
+                            bar.getAttribute('data-width') + '%';
+                    });
+
+
+                // Load Latest Data
+                loadData();
+
+            });
+
+            function handleExport() {
+
+                const element = document.querySelector(".page-wrapper");
+
+                // User se file name lo
+                let fileName = prompt("Enter file name:", "ClarityAI_Report");
+
+                // Agar user cancel kare ya empty ho
+                if (!fileName || fileName.trim() === "") {
+                    fileName = "ClarityAI_Report";
+                }
+
+                const opt = {
+                    margin: 5,
+                    filename: fileName + ".pdf",
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+
+                html2pdf().set(opt).from(element).save();
+            }
+
+        </script>
+
+</body>
+
+</html>
